@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 import psycopg2
 from psycopg2 import sql
 
@@ -25,9 +25,9 @@ def get_db_connection():
     except Exception as e:
         print(f"Error connecting to database: {e}")
         return None
-
-@app.route('/')
-def index():
+    
+@app.route('/compare')
+def compare():
     conn = get_db_connection()
     if conn:
         cur = conn.cursor()
@@ -38,6 +38,15 @@ def index():
         return str(rows)
     else:
         return "Failed to connect to the database."
+
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    if conn:
+        return render_template("index.html")
+    else:
+        return "Failed to connect to the database."
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
