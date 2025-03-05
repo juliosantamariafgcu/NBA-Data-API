@@ -2,13 +2,13 @@
 set -e
 
 echo "Waiting for PostgreSQL to be fully ready..."
-until PGPASSWORD=nba_password psql -h db -U nba_user -d nba_stats -c "SELECT 1;" &> /dev/null; do
+until PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "SELECT 1;" &> /dev/null; do
     sleep 2
     echo "Waiting for database connection..."
 done
 
 echo "Creating player_stats table..."
-PGPASSWORD=nba_password psql -h db -U nba_user -d nba_stats <<EOSQL
+PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} <<EOSQL
 CREATE TABLE IF NOT EXISTS player_stats (
     season_year TEXT,
     game_date DATE,
@@ -50,7 +50,7 @@ EOSQL
 echo "Importing CSV files..."
 for file in /csv/*.csv; do
     echo "Processing $file..."
-    PGPASSWORD=nba_password psql -h db -U nba_user -d nba_stats -c "\COPY player_stats FROM '$file' DELIMITER ',' CSV HEADER;"
+    PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "\COPY player_stats FROM '$file' DELIMITER ',' CSV HEADER;"
 done
 
 echo "Data import completed!"
