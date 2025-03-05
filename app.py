@@ -1,15 +1,19 @@
 from flask import Flask, render_template
 import psycopg2
 from psycopg2 import sql
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
 # Database connection details
-DB_HOST = '127.0.0.1'  # Localhost if running outside Docker; use 'db' if inside Docker
-DB_PORT = '5432'       # Local port (through Docker or port-forwarding)
-DB_NAME = 'nba_stats'  # Correct PostgreSQL database name
-DB_USER = 'nba_user'   # PostgreSQL username
-DB_PASSWORD = 'nba_password'  # PostgreSQL password
+DB_HOST = os.getenv('DB_HOST', '127.0.0.1')  # Default to localhost if not found
+DB_PORT = os.getenv('DB_PORT', '5432')
+DB_NAME = os.getenv('POSTGRES_DB', 'nba_stats')
+DB_USER = os.getenv('POSTGRES_USER', 'nba_user')
+DB_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'nba_password')
 
 # Establish the connection
 def get_db_connection():
