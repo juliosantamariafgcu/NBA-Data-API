@@ -1,14 +1,3 @@
-#!/bin/bash
-set -e
-
-echo "Waiting for PostgreSQL to be fully ready..."
-until PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "SELECT 1;" &> /dev/null; do
-    sleep 2
-    echo "Waiting for database connection..."
-done
-
-echo "Creating player_stats table..."
-PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} <<EOSQL
 CREATE TABLE IF NOT EXISTS player_stats (
     season_year TEXT,
     game_date DATE,
@@ -45,12 +34,19 @@ CREATE TABLE IF NOT EXISTS player_stats (
     points INTEGER,
     plus_minus_points INTEGER
 );
-EOSQL
 
-echo "Importing CSV files..."
-for file in /csv/*.csv; do
-    echo "Processing $file..."
-    PGPASSWORD=${POSTGRES_PASSWORD} psql -h db -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "\COPY player_stats FROM '$file' DELIMITER ',' CSV HEADER;"
-done
 
-echo "Data import completed!"
+COPY player_stats
+FROM '/docker-entrypoint-initdb.d/data/file1.csv'
+DELIMITER ','
+CSV HEADER;
+
+COPY player_stats
+FROM '/docker-entrypoint-initdb.d/data/file2.csv'
+DELIMITER ','
+CSV HEADER;
+
+COPY player_stats
+FROM '/docker-entrypoint-initdb.d/data/file3.csv'
+DELIMITER ','
+CSV HEADER;
