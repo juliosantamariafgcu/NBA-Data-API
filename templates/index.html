@@ -1,23 +1,173 @@
 <!DOCTYPE html>
-<html>
- 
+<html lang="en">
 <head>
-    <title>FlaskTest</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBA Player Stats (2010–2022)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #1d428a;
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #1d428a;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #16376e;
+    }
+
+    .player-info {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stats-table th,
+    .stats-table td {
+      padding: 0.75rem;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .stats-table th {
+      background-color: #e3e7ed;
+      font-weight: 600;
+    }
+
+    .stats-table tr:last-child td {
+      border-bottom: none;
+    }
+  </style>
 </head>
- 
 <body>
-    <h2>Welcome To GFG</h2>
-    <h4>Flask: Rendering Templates</h4>
- <!-- this section can be replaced by a child document -->  
-{% block body %}
- 
- 
-<p>This is a Flask application.</p>
- 
- 
-{% endblock %}
- 
- 
+  <header>
+    <h1>NBA Player Stats (2010–2022)</h1>
+  </header>
+
+  <main>
+    <div class="search-container">
+      <input type="text" id="playerInput" placeholder="Enter player name (e.g. LeBron James)" />
+      <button onclick="fetchPlayerStats()">Search</button>
+    </div>
+
+    <div class="player-info" id="playerInfo">
+      <!-- Player info like name, team, position will go here -->
+    </div>
+
+    <table class="stats-table" id="statsTable">
+      <thead>
+        <tr>
+          <th>Season</th>
+          <th>Team</th>
+          <th>PPG</th>
+          <th>RPG</th>
+          <th>APG</th>
+          <th>FG%</th>
+          <th>3P%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Stat rows go here -->
+      </tbody>
+    </table>
+  </main>
+  <script>
+    async function fetchPlayerStats() {
+      const playerName = document.getElementById("playerInput").value.trim();
+      const infoDiv = document.getElementById("playerInfo");
+      const tableBody = document.getElementById("statsTable").querySelector("tbody");
+  
+      // Clear previous content
+      infoDiv.innerHTML = "";
+      tableBody.innerHTML = "";
+  
+      if (!playerName) {
+        infoDiv.innerHTML = "<p>Please enter a player name.</p>";
+        return;
+      }
+  
+      try {
+        const response = await fetch(`http://localhost:8000/get_player_stats?name=${encodeURIComponent(playerName)}`);
+        const data = await response.json();
+  
+        if (data.error) {
+          infoDiv.innerHTML = `<p>${data.error}</p>`;
+          return;
+        }
+  
+        // Show player name
+        infoDiv.innerHTML = `<h2>${data.player}</h2>`;
+  
+        // Add rows to table
+        data.stats.forEach(stat => {
+          const row = `
+            <tr>
+              <td>${stat.season}</td>
+              <td>${stat.team}</td>
+              <td>${stat.ppg}</td>
+              <td>${stat.rpg}</td>
+              <td>${stat.apg}</td>
+              <td>${stat.fg_pct}%</td>
+              <td>${stat.three_pt_pct}%</td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
+      } catch (err) {
+        infoDiv.innerHTML = `<p>Error fetching player stats.</p>`;
+        console.error("Fetch error:", err);
+      }
+    }
+  </script>
 </body>
- 
 </html>
