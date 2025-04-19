@@ -8,10 +8,14 @@ load_dotenv()
 
 app = FastAPI()
 
+# python -m uvicorn api:app --reload --port 8000
+
 # Allow requests from Flask frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000"],
+    allow_origins=[
+        "http://127.0.0.1:5000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,23 +46,17 @@ def get_db_connection():
 def get_player_stats(name: str):
     try:
         conn = get_db_connection()
+        if not conn:
+            return {"error": "Database connection failed."}
+
         cur = conn.cursor()
-
         cur.execute("""
-            SELECT 
-                season_year,
-                team_tricode,
-                ROUND(AVG(points), 1) AS ppg,
-                ROUND(AVG(rebounds_total), 1) AS rpg,
-                ROUND(AVG(assists), 1) AS apg,
-                ROUND(AVG(field_goals_percentage) * 100, 1) AS fg_pct,
-                ROUND(AVG(three_pointers_percentage) * 100, 1) AS three_pt_pct
-            FROM player_stats
-            WHERE LOWER(person_name) = LOWER(%s)
-            GROUP BY season_year, team_tricode
-            ORDER BY season_year DESC
-        """, (name,))
+            SELECT * FROM player_stats
+            WHERE person_name ILIKE %s
+            ORDER BY game_date DESC
+        """, (f"%{name}%",))
 
+        columns = [desc[0] for desc in cur.description]
         rows = cur.fetchall()
         cur.close()
         conn.close()
@@ -68,22 +66,8 @@ def get_player_stats(name: str):
 
         return {
             "player": name,
-            "stats": [
-                {
-                    "season": row[0],
-                    "team": row[1],
-                    "ppg": row[2],
-                    "rpg": row[3],
-                    "apg": row[4],
-                    "fg_pct": row[5],
-                    "three_pt_pct": row[6]
-                }
-                for row in rows
-            ]
+            "stats": [dict(zip(columns, row)) for row in rows]
         }
+
     except Exception as e:
         return {"error": str(e)}
-    
-
-if __name__ == '__main__':
-    app.run(debug=True)

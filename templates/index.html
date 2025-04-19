@@ -22,15 +22,30 @@
     }
 
     main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 2rem auto;
       padding: 1rem;
+    }
+
+    .get-request-container {
+      border-left: 5px solid #4caf50;
+      background: #e8f5e9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .get-request-label {
+      font-weight: 700;
+      color: #2e7d32;
+      margin-bottom: 1rem;
     }
 
     .search-container {
       display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     input[type="text"] {
@@ -55,37 +70,21 @@
       background-color: #16376e;
     }
 
-    .player-info {
+    .request-url {
+      font-family: monospace;
+      background: #eef1f7;
+      padding: 0.5rem;
+      border-radius: 5px;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .stat-card {
       background: white;
       padding: 1rem;
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .stats-table th,
-    .stats-table td {
-      padding: 0.75rem;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-    }
-
-    .stats-table th {
-      background-color: #e3e7ed;
-      font-weight: 600;
-    }
-
-    .stats-table tr:last-child td {
-      border-bottom: none;
+      margin-bottom: 1.5rem;
     }
   </style>
 </head>
@@ -95,79 +94,22 @@
   </header>
 
   <main>
-    <div class="search-container">
-      <input type="text" id="playerInput" placeholder="Enter player name (e.g. LeBron James)" />
-      <button onclick="fetchPlayerStats()">Search</button>
+    <div class="get-request-container">
+      <div class="get-request-label">GET /get_player_stats?name=</div>
+      <div class="search-container">
+        <input type="text" id="playerInput" placeholder="Enter player name (e.g. LeBron James)" />
+        <button onclick='fetchPlayerStats()'>Send</button>
+      </div>
+      <div class="request-url" id="requestUrl">
+        <!-- Full GET request URL will go here -->
+      </div>
     </div>
 
-    <div class="player-info" id="playerInfo">
-      <!-- Player info like name, team, position will go here -->
+    <div id="playerInfo">
+      <!-- Stat cards go here -->
     </div>
-
-    <table class="stats-table" id="statsTable">
-      <thead>
-        <tr>
-          <th>Season</th>
-          <th>Team</th>
-          <th>PPG</th>
-          <th>RPG</th>
-          <th>APG</th>
-          <th>FG%</th>
-          <th>3P%</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Stat rows go here -->
-      </tbody>
-    </table>
   </main>
-  <script>
-    async function fetchPlayerStats() {
-      const playerName = document.getElementById("playerInput").value.trim();
-      const infoDiv = document.getElementById("playerInfo");
-      const tableBody = document.getElementById("statsTable").querySelector("tbody");
-  
-      // Clear previous content
-      infoDiv.innerHTML = "";
-      tableBody.innerHTML = "";
-  
-      if (!playerName) {
-        infoDiv.innerHTML = "<p>Please enter a player name.</p>";
-        return;
-      }
-  
-      try {
-        const response = await fetch(`http://localhost:8000/get_player_stats?name=${encodeURIComponent(playerName)}`);
-        const data = await response.json();
-  
-        if (data.error) {
-          infoDiv.innerHTML = `<p>${data.error}</p>`;
-          return;
-        }
-  
-        // Show player name
-        infoDiv.innerHTML = `<h2>${data.player}</h2>`;
-  
-        // Add rows to table
-        data.stats.forEach(stat => {
-          const row = `
-            <tr>
-              <td>${stat.season}</td>
-              <td>${stat.team}</td>
-              <td>${stat.ppg}</td>
-              <td>${stat.rpg}</td>
-              <td>${stat.apg}</td>
-              <td>${stat.fg_pct}%</td>
-              <td>${stat.three_pt_pct}%</td>
-            </tr>
-          `;
-          tableBody.innerHTML += row;
-        });
-      } catch (err) {
-        infoDiv.innerHTML = `<p>Error fetching player stats.</p>`;
-        console.error("Fetch error:", err);
-      }
-    }
-  </script>
+
+  <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
 </body>
 </html>
