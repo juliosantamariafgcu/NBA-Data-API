@@ -10,7 +10,7 @@ async function fetchPlayerStats() {
     return;
   }
 
-  const url = `http://localhost:8000/get_player_stats?name=${encodeURIComponent(playerName)}`;
+  const url = `https://localhost:8000/get_player_stats?name=${encodeURIComponent(playerName)}`;
 
   try {
     const response = await fetch(url);

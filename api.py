@@ -3,18 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 from dotenv import load_dotenv
 import os
+import uvicorn
 
 load_dotenv()
 
 app = FastAPI()
 
-# python -m uvicorn api:app --reload --port 8000
+# python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000 --ssl-keyfile=server.key --ssl-certfile=server.crt
 
 # Allow requests from Flask frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:5000"
+        "https://127.0.0.1:5000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -71,3 +72,6 @@ def get_player_stats(name: str):
 
     except Exception as e:
         return {"error": str(e)}
+    
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, ssl_keyfile="server.key", ssl_certfile="server.crt")
