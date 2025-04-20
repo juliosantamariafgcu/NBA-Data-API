@@ -1,3 +1,5 @@
 .env
 server.crt
 server.key
+venv
+__pycache__
