@@ -1,0 +1,6 @@
+uvicorn[standard]
+python-jose
+fastapi
+psycopg2
+python-multipart
+flask
