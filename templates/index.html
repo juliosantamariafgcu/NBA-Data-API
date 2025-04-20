@@ -10,8 +10,12 @@
 <body>
   <header>
     <h1>NBA Player Stats (2010–2022)</h1>
+    <div style="padding: 1rem; text-align: right;">
+      <input type="text" id="adminUsername" placeholder="Admin Username">
+      <input type="password" id="adminPassword" placeholder="Password">
+      <button onclick="adminLogin()">Admin Login</button>
+    </div>
   </header>
-
   <main>
     <div class="get-request-container">
       <div class="get-request-label">GET /get_player_stats?name=</div>
@@ -27,8 +31,104 @@
     <div id="playerInfo">
       <!-- Stat cards go here -->
     </div>
+
+    <div class="get-request-container admin-only" style="display: none;">
+      <div class="get-request-label">POST /add_player_stat</div>
+      <textarea id="addPayload" rows="5" style="width: 100%;" placeholder='JSON payload (e.g. {"person_name": "Test Player", "points": 25, ...})'></textarea>
+      <button onclick="sendAddRequest()">Add Player Stat</button>
+    </div>
+    
+    <div class="get-request-container admin-only" style="display: none;">
+      <div class="get-request-label">PUT /update_player_stat</div>
+      <textarea id="updatePayload" rows="5" style="width: 100%;" placeholder='JSON payload (e.g. {"game_id": 123, "points": 30})'></textarea>
+      <button onclick="sendUpdateRequest()">Update Player Stat</button>
+    </div>
+    
+    <div class="get-request-container admin-only" style="display: none;">
+      <div class="get-request-label">DELETE /delete_player_stat?game_id=</div>
+      <input type="text" id="deleteGameId" placeholder="Game ID" />
+      <button onclick="sendDeleteRequest()">Delete Player Stat</button>
+    </div>
   </main>
 
   <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
 </body>
+<script>
+  if (localStorage.getItem("admin_token")) {showAdminTools();}
+
+  function adminLogin() {
+  const username = document.getElementById("adminUsername").value;
+  const password = document.getElementById("adminPassword").value;
+
+  fetch("https://localhost:8000/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({ username, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.access_token) {
+      localStorage.setItem("admin_token", data.access_token);
+      alert("Admin login successful!");
+      showAdminTools();
+    } else {
+      alert("Login failed.");
+    }
+  });
+}
+
+function showAdminTools() {
+  document.querySelectorAll(".admin-only").forEach(el => {
+    el.style.display = "block";
+  });
+}
+
+  function callAdminAPI(url, method = "POST", payload = {}) {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      alert("You must be logged in as admin.");
+      return;
+    }
+
+    return fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: method === "GET" ? null : JSON.stringify(payload)
+    }).then(res => res.json());
+  }
+
+  function sendAddRequest() {
+  const payloadText = document.getElementById("addPayload").value;
+  try {
+    const payload = JSON.parse(payloadText);
+    callAdminAPI("https://localhost:8000/add_player_stat", "POST", payload)
+      .then(data => alert(JSON.stringify(data)));
+  } catch (e) {
+    alert("Invalid JSON in Add Player Stat.");
+  }
+}
+
+function sendUpdateRequest() {
+  const payloadText = document.getElementById("updatePayload").value;
+  try {
+    const payload = JSON.parse(payloadText);
+    callAdminAPI("https://localhost:8000/update_player_stat", "PUT", payload)
+      .then(data => alert(JSON.stringify(data)));
+  } catch (e) {
+    alert("Invalid JSON in Update Player Stat.");
+  }
+}
+
+function sendDeleteRequest() {
+  const gameId = document.getElementById("deleteGameId").value;
+  if (!gameId) return alert("Game ID is required.");
+  callAdminAPI(`https://localhost:8000/delete_player_stat?game_id=${gameId}`, "DELETE")
+    .then(data => alert(JSON.stringify(data)));
+}
+</script>
 </html>
