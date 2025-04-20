@@ -12,12 +12,12 @@ load_dotenv()
 
 app = FastAPI()
 
-# python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000 --ssl-keyfile=server.key --ssl-certfile=server.crt
+# python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000
 
 # Allow requests from Flask frontend (Links Different Ports)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://127.0.0.1:5000"],
+    allow_origins=["http://127.0.0.1:5000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -176,4 +176,4 @@ def delete_stat(person_id: int, game_date: str, admin=Depends(get_current_admin)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, ssl_keyfile="server.key", ssl_certfile="server.crt")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
