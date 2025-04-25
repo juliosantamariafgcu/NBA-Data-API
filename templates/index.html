@@ -60,7 +60,7 @@
   const username = document.getElementById("adminUsername").value;
   const password = document.getElementById("adminPassword").value;
 
-  fetch("https://localhost:8000/token", {
+  fetch("http://localhost:8000/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
@@ -106,7 +106,7 @@ function showAdminTools() {
   const payloadText = document.getElementById("addPayload").value;
   try {
     const payload = JSON.parse(payloadText);
-    callAdminAPI("https://localhost:8000/add_player_stat", "POST", payload)
+    callAdminAPI("http://localhost:8000/add_player_stat", "POST", payload)
       .then(data => alert(JSON.stringify(data)));
   } catch (e) {
     alert("Invalid JSON in Add Player Stat.");
@@ -117,7 +117,7 @@ function sendUpdateRequest() {
   const payloadText = document.getElementById("updatePayload").value;
   try {
     const payload = JSON.parse(payloadText);
-    callAdminAPI("https://localhost:8000/update_player_stat", "PUT", payload)
+    callAdminAPI("http://localhost:8000/update_player_stat", "PUT", payload)
       .then(data => alert(JSON.stringify(data)));
   } catch (e) {
     alert("Invalid JSON in Update Player Stat.");
@@ -127,7 +127,7 @@ function sendUpdateRequest() {
 function sendDeleteRequest() {
   const gameId = document.getElementById("deleteGameId").value;
   if (!gameId) return alert("Game ID is required.");
-  callAdminAPI(`https://localhost:8000/delete_player_stat?game_id=${gameId}`, "DELETE")
+  callAdminAPI(`http://localhost:8000/delete_player_stat?game_id=${gameId}`, "DELETE")
     .then(data => alert(JSON.stringify(data)));
 }
 </script>
